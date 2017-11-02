@@ -3,7 +3,7 @@ set -xeuo pipefail
 
 NODE_IP=$1
 KEYSDIR="${HOME}/keys"
-K8VERSION="v1.5.1_coreos.0"
+K8VERSION="v1.8.2_coreos.0"
 NODE_DNS=${2:-}
 
 echo "Enabling iptables"
@@ -16,6 +16,7 @@ echo "setting k8s in ${NODE_IP}"
 
 sudo mkdir -p /etc/systemd/system/etcd2.service.d
 sudo mkdir -p /etc/kubernetes/manifests
+sudo mkdir -p /etc/kubernetes/kubelet
 sudo mkdir -p /etc/kubernetes/ssl/apiserver
 sudo mkdir -p /etc/kubernetes/ssl/kube-dns
 sudo mkdir -p /etc/kubernetes/ssl/kube-dashboard
@@ -29,6 +30,7 @@ sed "s/__PUBLICIP__/${NODE_IP}/g" files/40-listen-address.conf  > /tmp/40-listen
 sudo mv /tmp/40-listen-address.conf  /etc/systemd/system/etcd2.service.d/40-listen-address.conf
 
 echo "starting etcd..."
+
 sudo systemctl start etcd2
 sudo systemctl enable etcd2
 
@@ -68,6 +70,7 @@ openssl req -new -key ${KEYSDIR}/clientcert-key.pem -out ${KEYSDIR}/clientcert.c
 openssl x509 -req -in ${KEYSDIR}/clientcert.csr -CA ${KEYSDIR}/ca.pem -CAkey ${KEYSDIR}/ca-key.pem -CAcreateserial -out ${KEYSDIR}/clientcert.pem
 openssl pkcs12 -export -in ${KEYSDIR}/clientcert.pem -inkey ${KEYSDIR}/clientcert-key.pem -out ${KEYSDIR}/clientcert.p12 -passout pass:K8sCert -certfile ${KEYSDIR}/ca.pem
 
+sudo cp -p files/kubelet.yml /etc/kubernetes/kubelet/
 sudo cp -p ${KEYSDIR}/ca.pem /etc/kubernetes/ssl/
 for POD in "apiserver" "kube-dns" "kube-dashboard"
 do
@@ -126,7 +129,7 @@ done
 set -x
 
 echo "install kubectl"
-curl -s -O https://storage.googleapis.com/kubernetes-release/release/v1.5.1/bin/linux/amd64/kubectl
+curl -s -O https://storage.googleapis.com/kubernetes-release/release/v1.8.2/bin/linux/amd64/kubectl
 sudo mv kubectl /opt/bin
 sudo chmod +x /opt/bin/kubectl
 

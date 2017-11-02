@@ -5,9 +5,9 @@ Basic k8s setup for a Core OS single node with the aim to use for staging or CI 
 This version has been tested with Container Linux installed on KVM VPS. It requires a Core OS instance running, then connect to it and:
 
 ```bash
-git clone https://github.com/m3adow/k8single/; 
+git clone https://github.com/hopengfoong/k8single/; 
 cd k8single
-./kubeform.sh [myip-address] [DNS entry for K8s apiserver (optional)]
+./kubeform.sh [myip-address (ip address of eth0)] [DNS entry for K8s apiserver (optional)]
 ```
 
 This will deploy k8 into a single schedulable node, it sets up kubectl in the node and deploys the skydns and dashboard add ons. Furthermore iptables is set up to secure etcd2.
