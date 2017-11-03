@@ -4,7 +4,9 @@ set -xeuo pipefail
 NODE_IP=$1
 KEYSDIR="${HOME}/keys"
 K8VERSION="v1.8.2_coreos.0"
-NODE_DNS=${2:-}
+MYUSER=$2
+MYPASS=$3
+NODE_DNS=${4:-}
 
 echo "Enabling iptables"
 sudo systemctl enable iptables-restore
@@ -102,8 +104,6 @@ echo "configuring etcd"
 curl -s -X PUT -d "value={\"Network\":\"10.2.0.0/16\",\"Backend\":{\"Type\":\"vxlan\"}}" "http://${NODE_IP}:2379/v2/keys/coreos.com/network/config"
 
 echo "Creating basicauth file"
-MYPASS=$(openssl rand -hex 24)
-MYUSER=$(openssl rand -hex 12)
 sudo bash -c "echo ${MYPASS},${MYUSER},1 > /etc/kubernetes/ssl/apiserver/basicauth.pass"
 
 echo "starting kubernetes"
